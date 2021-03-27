@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+ZIP_FILE=project1.zip
+REQUIRED_FILES="actors.sql ComputeSHA.java"
+OPTIONAL_FILES="README.txt"
+
+TMP_NAME=project1
+TMP_DIR=/tmp/${TMP_NAME}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#error function
+function error_exit()
+{
+   echo -e "ERROR: $1" 1>&2
+   rm -rf ${TMP_DIR}
+   exit 1
+}
+
+# make sure running in container
+if [ `whoami` != "cs144" ]; then
+    error_exit "You need to run this script within the container"
+fi
+
+# clean any existing files
+rm -rf ${TMP_DIR}
+mkdir ${TMP_DIR}
+
+# change to the container contains this script
+cd ${DIR}
+
+
+# check file existence
+if [ -f ${ZIP_FILE} ]; then
+    rm -f ${ZIP_FILE}
+fi
+
+# check the existence of the required files
+for FILE in ${REQUIRED_FILES}
+do
+    if [ ! -f ${FILE} ]; then
+        echo "ERROR: Cannot find ${FILE} in ${DIR}" 1>&2
+        exit 1
+    fi
+done
+
+# check the existence of the optional files
+TO_ADD=""
+for FILE in ${OPTIONAL_FILES}
+do
+    if [ -f ${FILE} ]; then
+	TO_ADD+=" ${FILE}"
+    fi
+done
+
+# check if actors.sql loads data using relative path
+LOAD_CMD=$(grep -E "\./actors.csv" actors.sql)
+if [ -z "${LOAD_CMD}" ]; then
+    error_exit 'The string "./actors.csv" does not appear in actors.sql. Are you using a RELATIVE path in your LOAD DATA command?'
+fi
+
+echo "zip ${ZIP_FILE} ${REQUIRED_FILES} ${TO_ADD}"
+zip ${ZIP_FILE} ${REQUIRED_FILES} ${TO_ADD}
+if [ $? -ne 0 ]; then
+    error_exit "Create ${ZIP_FILE} failed, check for error messages in console."
+fi
+
+echo "[SUCCESS] Created '$DIR/${ZIP_FILE}'"
+
+exit 0
