@@ -3,7 +3,7 @@
     <display-name>Markdown Editor</display-name>
     <servlet>
         <servlet-name>Editor</servlet-name>
-        <servlet-class>Editor</servlet-class>
+        <servlet-class>Project2.Editor</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Editor</servlet-name>

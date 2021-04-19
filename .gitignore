@@ -2,3 +2,7 @@ project1/myfile
 project1/ComputeSHA.class
 project1/project1.zip
 project2.zip
+project2/.gradle/**
+project2/build/**
+project2/bin/**
+project2/.settings/org.eclipse.buildship.core.prefs

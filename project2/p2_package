@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+ZIP_FILE=project2.zip
+REQUIRED_FILES="deploy.sh build.gradle create.sql src/main/webapp/WEB-INF/web.xml"
+
+TMP_NAME=project2
+TMP_DIR=/tmp/${TMP_NAME}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#error function
+function error_exit()
+{
+   echo -e "ERROR: $1" 1>&2
+   rm -rf ${TMP_DIR}
+   exit 1
+}
+
+# make sure running in container
+if [ `whoami` != "cs144" ]; then
+    error_exit "You need to run this script within the container"
+fi
+
+# clean any existing files
+rm -rf ${TMP_DIR}
+mkdir ${TMP_DIR}
+
+# change to the container contains this script
+cd ${DIR}
+
+
+# check file existence
+if [ -f ${ZIP_FILE} ]; then
+    rm -f ${ZIP_FILE}
+fi
+
+# check the existence of the required files
+for FILE in ${REQUIRED_FILES}
+do
+    if [ ! -f ${FILE} ]; then
+        echo "ERROR: Cannot find ${FILE} in ${DIR}" 1>&2
+        exit 1
+    fi
+done
+
+# Make sure there is at least one java file and one jsp file
+FILE_COUNT="$( find src/main/java/ -name '*.java' -print | wc -l )"
+if [ "$FILE_COUNT" -eq 0 ]; then
+    error_exit "Cannot find any .java source files in the directory."
+fi 
+FILE_COUNT="$( find src/main/webapp/ -name '*.jsp' -print | wc -l )"
+if [ "$FILE_COUNT" -eq 0 ]; then
+    error_exit "Cannot find any .jsp source files in the directory."
+fi 
+
+# check the format of group.txt
+#VALID_UID=$(grep -E "^[0-9]{9}\s*$" group.txt)
+#if [ -z "${VALID_UID}" ]; then
+#    error_exit "No valid UID was found in group.txt.\nInclude one 9-digit UID per line. No spaces or dashes, please."
+#fi
+#NON_UID=$(grep -v -E "^[0-9]{9}\s*$" group.txt)
+#if [ -n "${NON_UID}" ]; then
+#    error_exit "Following lines are invalid in group.txt\n${NON_UID}\nInclude one 9-digit UID per line. No spaces or dashes, please."
+#fi
+#
+zip ${ZIP_FILE} -x p2_package \*.class \*.war .gradle/\* build/\* .DS_Store @ -r .
+if [ $? -ne 0 ]; then
+    error_exit "Create ${ZIP_FILE} failed, check for error messages in console."
+fi
+
+echo "[SUCCESS] Created '$DIR/${ZIP_FILE}'"
+
+exit 0
