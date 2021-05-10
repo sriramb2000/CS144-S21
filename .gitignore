@@ -6,3 +6,4 @@ project2/.gradle/**
 project2/build/**
 project2/bin/**
 project2/.settings/org.eclipse.buildship.core.prefs
+project3/node_modules
