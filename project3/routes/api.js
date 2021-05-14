@@ -34,11 +34,11 @@ const handleGet = async(req, res, next) => {
 // POST /api/posts
 const handlePost = async(req, res, next) => {
     let { username, postid, title, body } = req.body;
-    if (!title || !body) {
+    postid = `${postid}`;
+    if (!title || !body || !postid.length()) {
         return res.sendStatus(400);
     }
     postid = parseInt(postid);
-
 
     const user = await User.find(username);
     if (!user) {
@@ -55,13 +55,15 @@ const handlePost = async(req, res, next) => {
 
         data = await Post.update(post, title, body);
         return res.json(data).status(200);
-    } else {
+    } else if (postid == 0) {
         // Create post
         newPostId = user.maxid + 1
             // Update max post id for user
         await User.update(user, newPostId);
         data = await Post.create(user, newPostId, title, body);
         return res.status(201).json(data);
+    } else {
+        return res.sendStatus(400).json({ message: "Invalid postid" });
     }
 }
 
@@ -69,7 +71,7 @@ const handlePost = async(req, res, next) => {
 const handleDelete = async(req, res, next) => {
     let { username, postid } = req.query;
     postid = `${postid}`;
-    if (!username || !postid) {
+    if (!username || !postid.length()) {
         return res.status(400).json({ message: "Bad request" }).send();
     }
     postid = parseInt(postid);
