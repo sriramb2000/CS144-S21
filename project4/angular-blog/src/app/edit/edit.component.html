@@ -1,0 +1,21 @@
+<div class="post-edit">
+    <div>
+        {{getModifiedTime(post.modified)}}
+
+        <h4>Title:</h4>
+        <input type="text" id="edit-title" [(ngModel)]="post.title">
+        <h4>Body:</h4>
+        <textarea id="edit-body" [(ngModel)]="post.body"></textarea>
+        <div>
+            <h4>Last Modified: </h4>
+            {{modifiedTime}}
+        </div>
+
+        <button id="edit-save-button" (click)="saveOnClick(post)">save</button>
+        <button id="edit-preview-button" (click)="previewOnClick(post)">preview</button>
+        <button id="edit-delete-button" (click)="deleteOnClick(post)">delete</button>
+    </div>
+
+
+
+</div>

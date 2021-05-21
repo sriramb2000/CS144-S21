@@ -1,0 +1,14 @@
+<div class="box2">
+  <app-list [posts]="posts" (openPost)="openPost($event);" (newPost)="newPost();"></app-list>
+</div>
+
+<div class="box2">
+  <div *ngIf="ifEdit()">
+    <app-edit [post]="currentPost" (previewPost)="previewPost($event);" (savePost)="savePost($event);"
+      (deletePost)="deletePost($event);"></app-edit>
+  </div>
+
+  <div *ngIf="ifPreview()">
+    <app-preview [post]="currentPost" (editPost)="editPost($event);"></app-preview>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+<div>
+    <button id="list-new-button" (click)="generateNewPost()">New Post</button>
+    <ul class="post-list">
+        <li *ngFor="let post of posts" (click)="openOnClick(post)" id="list-post-{{post.postid}}">
+            {{post.title}} {{intToDate(post.created)}}
+        </li>
+    </ul>
+</div>

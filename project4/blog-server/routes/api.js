@@ -1,0 +1,102 @@
+const express = require('express');
+const User = require('../models/user');
+const Post = require('../models/post');
+
+// GET /api/posts?username=:username
+// GET /api/posts?username=:username&postid=:postid
+const handleGet = async(req, res, next) => {
+    const { username, postid } = req.query;
+
+    if (!username) {
+        return res.status(400).send();
+    }
+
+    try {
+        const user = await User.find(username);
+
+        let data = null;
+        if (postid) {
+            data = await Post.find(user, parseInt(postid));
+            if (!data) {
+                throw new Error("Post not found.");
+            }
+        } else {
+            data = await Post.findAllUserPosts(user);
+        }
+
+        res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        next();
+    }
+}
+
+// POST /api/posts
+const handlePost = async(req, res, next) => {
+    let { username, postid, title, body } = req.body;
+    postid = `${postid}`;
+    if (!title || body == undefined || !postid.length) {
+        return res.sendStatus(400);
+    }
+    postid = parseInt(postid);
+
+    const user = await User.find(username);
+    if (!user) {
+        return res.sendStatus(404);
+    }
+
+
+    let data = null;
+    if (postid > 0) {
+        const post = await Post.find(user, postid);
+        if (!post) {
+            return res.sendStatus(404);
+        }
+
+        data = await Post.update(post, title, body);
+        return res.status(200).json(data)
+    } else if (postid == 0) {
+        // Create post
+        newPostId = user.maxid + 1
+            // Update max post id for user
+        await User.update(user, newPostId);
+        data = await Post.create(user, newPostId, title, body);
+        return res.status(201).json(data)
+    } else {
+        return res.sendStatus(400).json({ message: "Invalid postid" });
+    }
+}
+
+// DELETE /api/posts?username=:username&postid=:postid
+const handleDelete = async(req, res, next) => {
+    let { username, postid } = req.query;
+    postid = `${postid}`;
+    if (!username || !postid.length) {
+        return res.status(400).json({ message: "Bad request" }).send();
+    }
+    postid = parseInt(postid);
+
+    try {
+        const user = await User.find(username);
+        const post = await Post.find(user, postid);
+
+        if (!post) {
+            throw new Error("User and/or Post does not exist.");
+        }
+
+        await Post.remove(post);
+
+        res.status(204).json({ message: "Deleted post." });
+    } catch (e) {
+        console.log(e);
+        next();
+    }
+}
+
+const router = express.Router();
+
+router.get("/", handleGet);
+router.post("/", handlePost);
+router.delete("/", handleDelete);
+
+module.exports = router;

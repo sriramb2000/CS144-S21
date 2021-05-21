@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        My Blog Site :D
+    </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+    <h1><%- posts[0].authorLine %></h1>
+    <ul>
+        <% for(let i = 0; i < posts.length; i++) { %>
+            <li>
+                <div>
+                    <%- posts[i].titleHtml %>
+                    <%- posts[i].bodyHtml %>
+                    <br>
+                    <%- posts[i].dateLine %>
+                </div>  
+            </li>
+        <% } %>
+    </ul>
+    
+    <br>
+    <% if (hasMore) { %>
+        <a id="next_link" href="?start=<%= newStart %>">Next</a>
+    <% } %>
+</body>
+
+</html>
