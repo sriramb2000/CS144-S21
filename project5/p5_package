@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+ZIP_FILE="project5.zip"
+REQUIRED_FILES="read_tomcat.py write_tomcat.py mixed_tomcat.py read_node.py write_node.py mixed_node.py performance.json summary_tomcat.txt summary_node.txt"
+OPTIONAL_FILES="README.txt"
+
+CUR_DIR=$(pwd)
+SRC_DIR=${CUR_DIR}
+
+#error function
+function error_exit()
+{
+   echo -e "ERROR: $1" 1>&2
+   exit 1
+}
+
+# make sure running in container
+if [ `whoami` != "cs144" ]; then
+    error_exit "You need to run this script within the container"
+fi
+
+# if the source directory is passed as parameter, use it
+if [ $# -eq 1 ]; then
+    SRC_DIR=$1
+fi
+
+# remove existing zip file if any
+if [ -f ${CUR_DIR}/${ZIP_FILE} ]; then
+    rm -f ${CUR_DIR}/${ZIP_FILE}
+fi
+
+# change to the source directory
+cd ${CUR_DIR} # in case SRC_DIR is given relative to CUR_DIR
+cd ${SRC_DIR}
+
+# check the existence of the required files
+for FILE in ${REQUIRED_FILES}
+do
+    if [ ! -f ${FILE} ]; then
+        echo "ERROR: Cannot find ${FILE} in ${SRC_DIR}" 1>&2
+        exit 1
+    fi
+done
+
+# check the existence of the optional files
+TO_ADD=""
+for FILE in ${OPTIONAL_FILES}
+do
+    if [ -f ${FILE} ]; then
+	TO_ADD+=" ${FILE}"
+    fi
+done
+
+zip -q ${CUR_DIR}/${ZIP_FILE} ${REQUIRED_FILES} ${TO_ADD}
+if [ $? -ne 0 ]; then
+    error_exit "Create ${ZIP_FILE} failed, check for error messages in console."
+fi
+
+echo "[SUCCESS] Created '${CUR_DIR}/${ZIP_FILE}'"
+
+exit 0
